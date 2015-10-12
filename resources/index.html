@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <script src="/resources/js/jquery-2.1.1.min.js"></script>
+    <link rel="stylesheet" href="/resources/css/bootstrap.min.css">
+    <script src="/resources/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/resources/css/datepicker.css">
+    <script src="/resources/js/bootstrap-datepicker.js"></script>
+    <script type="text/javascript">
+        function onLoad() {
+            $.ajax({
+                type: 'GET',
+                url: 'http://localhost:45678/customer/all',
+                dataType: 'json',
+                context: document.body,
+                crossDomain: true,
+                success: function (data, textStatus, jqXHR) {
+                    createCustomerRows(data);
+                }
+            });
+        }
+
+        function createCustomerRows(customers) {
+            for (var customer in customers)
+                $('#customer_table').find('> tbody').append(makeCustomerRow(customers[customer]));
+        }
+
+        function makeCustomerRow(customer) {
+            return '<tr id="' + customer.id + '">' +
+                    makeCustomerCells(customer) +
+                    makeCustomerActions(customer) +
+                    '</tr>';
+        }
+
+        function makeCustomerCells(customer) {
+            return '<td>' + customer.firstName + '</td><td>' + customer.lastName + '</td><td></td>';
+        }
+
+        function makeCustomerActions(customer) {
+            return '<td>' +
+                    '<div class="btn-group btn-group-sm">' +
+                    '<a class="btn btn-primary" href="/resources/update_customer.html?id=' + customer.id + '">' +
+                    '<span class="glyphicon glyphicon-pencil"></span> Update</a>' +
+                    '<a class="btn btn-danger" onclick="deleteCustomer(\'' + customer.id + '\')">' +
+                    '<span class="glyphicon glyphicon-trash"></span> Delete</a>' +
+                    '</div>' +
+                    '</td>';
+        }
+
+        function deleteCustomer(id) {
+            $.ajax({
+                type: 'DELETE',
+                url: 'http://localhost:45678/customer/' + id,
+                dataType: 'json',
+                context: document.body,
+                crossDomain: true,
+                success: function (data, textStatus, jqXHR) {
+                    $("#" + id).remove();
+                }
+            });
+        }
+    </script>
+    <title>All customers</title>
+</head>
+<body onload="onLoad()">
+<div class="container">
+    <div class="page-header col-xs-10">
+        <h1>All customers</h1>
+    </div>
+    <table id="customer_table" class="table table-condensed table-hover table-striped">
+        <thead>
+        <tr>
+            <th>First name</th>
+            <th>Last name</th>
+            <th>Birth date</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <a class="btn btn-primary" href="/resources/create_customer.html">Create</a>
+</div>
+</body>
+</html>

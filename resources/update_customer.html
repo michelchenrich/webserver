@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <script src="/resources/js/jquery-2.1.1.min.js"></script>
+    <link rel="stylesheet" href="/resources/css/bootstrap.min.css">
+    <script src="/resources/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/resources/css/datepicker.css">
+    <script src="/resources/js/bootstrap-datepicker.js"></script>
+    <script src="/resources/js/form-validation.js"></script>
+    <script type="text/javascript">
+        var urlParams;
+        (window.onpopstate = function () {
+            var match,
+                    pl = /\+/g,  // Regex for replacing addition symbol with a space
+                    search = /([^&=]+)=?([^&]*)/g,
+                    decode = function (s) {
+                        return decodeURIComponent(s.replace(pl, " "));
+                    },
+                    query = window.location.search.substring(1);
+
+            urlParams = {};
+            while (match = search.exec(query))
+                urlParams[decode(match[1])] = decode(match[2]);
+        })();
+
+        function onLoad() {
+            $('.datepicker').datepicker();
+            $.ajax({
+                type: 'GET',
+                url: 'http://localhost:45678/customer/' + urlParams["id"],
+                dataType: 'json',
+                context: document.body,
+                crossDomain: true,
+                success: function (data, textStatus, jqXHR) {
+                    $('#inputFirstName').val(data.firstName);
+                    $('#inputLastName').val(data.lastName);
+                },
+            });
+        }
+
+        function submit() {
+            clearMessage('firstName');
+            clearMessage('lastName');
+            clearMessage('birthDate');
+            $.ajax({
+                type: 'PUT',
+                url: 'http://localhost:45678/customer/' + urlParams["id"],
+                data: {
+                    firstName: $('#inputFirstName').val(),
+                    lastName: $('#inputLastName').val(),
+                    birthDate: $('#inputBirthDate').val()
+                },
+                dataType: 'json',
+                context: document.body,
+                crossDomain: true,
+                success: function (data, textStatus, jqXHR) {
+                    location.replace("/resources/index.html");
+                },
+                error: function (qXHR) {
+                    displayMessages(qXHR.responseJSON);
+                }
+            });
+        }
+    </script>
+    <title>Update customer</title>
+</head>
+<body onload="onLoad()">
+<div class="container">
+    <div class="page-header col-xs-10">
+        <h1>Update customer</h1>
+    </div>
+    <form class="form-horizontal" role="form">
+        <div id="firstName" class="form-group">
+            <label for="inputFirstName" class="col-xs-4 control-label">First name</label>
+
+            <div class="col-xs-6">
+                <input type="text" class="form-control" id="inputFirstName" placeholder="First name">
+                <span id="firstName-help" class="help-block"></span>
+            </div>
+        </div>
+        <div id="lastName" class="form-group">
+            <label for="inputLastName" class="col-xs-4 control-label">Last name</label>
+
+            <div class="col-xs-6">
+                <input type="text" class="form-control" id="inputLastName" placeholder="Last name">
+                <span id="lastName-help" class="help-block"></span>
+            </div>
+        </div>
+        <div id="birthDate" class="form-group">
+            <label for="inputBirthDate" class="col-xs-4 control-label">Birth date</label>
+
+            <div class="col-xs-6">
+                <input id="inputBirthDate" class="datepicker form-control" data-date-format="dd/mm/yyyy">
+                <span id="birthDate-help" class="help-block"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-offset-4 col-xs-6">
+                <a onclick="submit()" class="btn btn-primary">Update</a>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>
